@@ -4,17 +4,31 @@ import torch.nn.functional as F
 from .tools import check_legal_input, get_embedding_matrix
 
 
-def get_illegal_tokens(tokenizer, device='cpu'):
+def get_illegal_tokens(tokenizer):
 
     def is_ascii(s):
         return s.isascii() and s.isprintable()
 
-    ascii_toks = [0, 1, 2]
-    for i in range(3, tokenizer.vocab_size):
+    ascii_toks = []
+    for i in range(tokenizer.vocab_size):
         if not is_ascii(tokenizer.decode([i])):
             ascii_toks.append(i)
 
-    return tuple(ascii_toks)
+    if tokenizer.bos_token_id is not None:
+        ascii_toks.append(tokenizer.bos_token_id)
+    if tokenizer.eos_token_id is not None:
+        ascii_toks.append(tokenizer.eos_token_id)
+    if tokenizer.pad_token_id is not None:
+        ascii_toks.append(tokenizer.pad_token_id)
+    if tokenizer.unk_token_id is not None:
+        ascii_toks.append(tokenizer.unk_token_id)
+
+    if "Baichuan2" in tokenizer.name_or_path:
+        ascii_toks += [i for i in range(101, 1000)]
+
+    ascii_toks = tuple(set(ascii_toks))
+    return ascii_toks
+
 
 class GCGAttack:
     def __init__(self,
