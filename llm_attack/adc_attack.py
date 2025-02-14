@@ -40,7 +40,7 @@ class ADCAttack:
                  momentum=0.99,
                  use_kv_cache=True,
                  judger=None):
-        momentum = 0.
+
         self.model = model
         self.tokenizer = tokenizer
         self.num_starts = num_starts
